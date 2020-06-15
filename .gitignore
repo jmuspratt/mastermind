@@ -1,0 +1,10 @@
+# caching and debuging
+/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# OS/IDE specific files
+.DS_Store
+.vscode
