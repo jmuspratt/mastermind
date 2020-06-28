@@ -1,0 +1,59 @@
+:root {
+	--peg-size: 50px;
+	--slot-size: 50px;
+}
+
+body, body * {
+	box-sizing: border-box;
+}
+body {
+	background: #333;
+	}
+
+.game {
+	width: 500px;
+	padding: 50px;
+}
+
+.controls-row {
+	 display: flex;
+	 align-items: center;
+	 justify-content: space-between;
+	 padding: 0 0 50px 0;
+
+}
+.control {
+	 border-radius: 50%;;
+	 width: var(--peg-size);
+	 height: var(--peg-size);
+}
+
+.control.over {
+		border-color: white;
+	transform: scale(1.25);
+}
+
+.game-board {
+	min-height: 400px;
+}
+
+
+.guess-row {
+	align-items: center;
+	display: flex;
+	justify-content: space-between;
+	margin: 0 0 20px;
+}
+
+.guess-slot {
+	border: 1px solid rgba(255,255,255, 0.4);
+	border-radius: 50%;
+	height: var(--slot-size);
+	display: block;
+	width: var(--slot-size);
+}
+
+.guess-slot.hovered {
+	border-color: white;
+	transform: scale(1.25);
+}
