@@ -1,28 +1,66 @@
 class Game {
 	constructor() {
 		this.game = document.querySelector('.game');
+		this.slots = document.querySelectorAll('.guess-slot');
 		this.setupControlsRow();
 		this.setupGameBoard();
 
-		this.dragColor = 'purple';
-		this.draggables = document.querySelectorAll('.control');
-		this.dropzones = document.querySelectorAll('.guess-slot');
-		this.setupDragAndDrop();
+		this.dragColor = null;
+		this.activeRow = 1;
+
+		this.setUpDraggables();
+		this.enableRow('1'); // row 1
 
 	}
 
-	setupDragAndDrop() {
-
+	setUpDraggables() {
+		this.draggables = document.querySelectorAll('.control');
 		this.draggables.forEach((control)=>{
 			control.addEventListener('dragstart', this.handleDragStart.bind(this));
 			control.addEventListener('dragend', this.handleDragEnd.bind(this));
 		})
-		this.dropzones.forEach((zone)=>{
+
+	}
+
+	enableRow(rowNumber) {
+		const dropzones = document.querySelectorAll(`.guess-slot--row-${rowNumber}`);
+
+		dropzones.forEach((zone)=>{
+			zone.classList.add('ready');
+			zone.setAttribute('data-guess', 'null');
 			zone.addEventListener('dragover', this.handleDragOver.bind(this));
 			zone.addEventListener('dragenter', this.handleDragEnter.bind(this));
 			zone.addEventListener('dragleave', this.handleDragLeave.bind(this));
 			zone.addEventListener('drop', this.handleDrop.bind(this));
 		});
+	}
+
+	postDrop() {
+		const cols = document .querySelectorAll(`.guess-slot--row-${this.activeRow}`);
+		const colsComplete = [...cols].filter(item => (item.getAttribute('data-guess') !== 'null'));
+
+		if (colsComplete.length == 4) {
+			alert('row done')
+			this.completeRow(this.activeRow);
+			if (this.activeRow < 10) {
+				this.activeRow ++;
+				this.enableRow(this.activeRow);
+			}
+
+		}
+	}
+
+	completeRow(rowNumber) {
+		const dropzones = document.querySelectorAll(`.guess-slot--row-${rowNumber}`);
+		dropzones.forEach((zone)=>{
+			zone.classList.remove('ready');
+			zone.classList.add('complete');
+			zone.removeEventListener('dragover', this.handleDragOver.bind(this));
+			zone.removeEventListener('dragenter', this.handleDragEnter.bind(this));
+			zone.removeEventListener('dragleave', this.handleDragLeave.bind(this));
+			zone.removeEventListener('drop', this.handleDrop.bind(this));
+		});
+
 	}
 
 	handleDragStart(e) {
@@ -33,12 +71,11 @@ class Game {
 	}
 
 	handleDragEnd(e) {
-		e.target.classList.add('fill');
 	}
 
 	handleDragEnter(e){
 		e.preventDefault();
-		console.log('drag enter', e.target);
+		// console.log('drag enter', e.target);
 		e.target.classList.add('hovered');
 
 	}
@@ -47,22 +84,24 @@ class Game {
 	    e.preventDefault(); // Necessary. Allows us to drop.
 	}
 
-		handleDragLeave(e) {
-			console.log('drag leave');
-			e.target.classList.remove('hovered');  // this / e.target is previous target element.
+	handleDragLeave(e) {
+		// console.log('drag leave');
+		e.target.classList.remove('hovered');  // this / e.target is previous target element.
+	}
+
+	handleDrop(e) {
+		// console.log('handle drop on', e.target);
+		if (e.stopPropagation) {
+			e.stopPropagation(); // stops the browser from redirecting.
 		}
+		e.target.classList.remove('hovered');
+		e.target.style.backgroundColor = this.dragColor;
+		e.target.setAttribute('data-guess', this.dragColor);
 
-		handleDrop(e) {
-			// this / e.target is current target element.
-			console.log('handle drop on', e.target);
-			if (e.stopPropagation) {
-				e.stopPropagation(); // stops the browser from redirecting.
-			}
+		this.postDrop();
 
-			e.target.style.backgroundColor = this.dragColor;
+	}
 
-			return false;
-		}
 
 
 	setupGameBoard() {
@@ -84,6 +123,7 @@ class Game {
 		}
 
 	}
+
 	setupControlsRow() {
 
 		const colors = ['red', 'green', 'blue', 'white', 'yellow', 'black'];

@@ -28,6 +28,7 @@ body {
 	 height: var(--peg-size);
 }
 
+
 .control.over {
 		border-color: white;
 	transform: scale(1.25);
@@ -46,14 +47,25 @@ body {
 }
 
 .guess-slot {
-	border: 1px solid rgba(255,255,255, 0.4);
+	background: #444;
 	border-radius: 50%;
 	height: var(--slot-size);
 	display: block;
 	width: var(--slot-size);
+	transition: all .2s linear;
+}
+
+
+
+.guess-slot.ready {
+	background: #888;
+}
+
+.guess-slot.complete {
+	opacity: 0.8;
 }
 
 .guess-slot.hovered {
-	border-color: white;
+	border: 1px solid white;
 	transform: scale(1.25);
 }
