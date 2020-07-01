@@ -3,13 +3,18 @@ class Game {
 	constructor() {
 		this.game = document.querySelector('.game');
 		this.slots = document.querySelectorAll('.guess-slot');
+		this.pegColors = ['red', 'green', 'blue', 'white', 'yellow', 'black'];
+
+		this.setupSecret();
+
 		this.setupControlsRow();
 		this.setupGameBoard();
 
 		this.dragColor = null;
 		this.activeRow = 1;
 
-		// bound event listeners
+		// Bound event listeners
+		// https://stackoverflow.com/questions/11565471/removing-event-listener-which-was-added-with-bind
 		this.boundDragOver = this.handleDragOver.bind(this);
 		this.boundDragEneter = this.handleDragEnter.bind(this);
 		this.boundDragLeave = this.handleDragLeave.bind(this);
@@ -18,6 +23,9 @@ class Game {
 		this.setUpDraggables();
 		this.enableRow('1'); // row 1
 
+	}
+	setupSecret() {
+		this.secret = ['red', 'blue', 'green', 'green']
 	}
 
 	setUpDraggables() {
@@ -30,12 +38,12 @@ class Game {
 	}
 
 	enableRow(rowNumber) {
+		const row = document.querySelector(`.guess-row--${rowNumber}`);
+		row.classList.add('active');
+
 		const dropzones = document.querySelectorAll(`.guess-slot--row-${rowNumber}`);
-
 		dropzones.forEach((zone, i)=>{
-			zone.classList.add('ready');
 			zone.setAttribute('data-guess', 'null');
-
 			zone.addEventListener('dragover', this.boundDragOver);
 			zone.addEventListener('dragenter', this.boundDragEnter);
 			zone.addEventListener('dragleave', this.boundDragLeave);
@@ -45,34 +53,89 @@ class Game {
 	}
 
 	postDrop() {
-		const cols = document .querySelectorAll(`.guess-slot--row-${this.activeRow}`);
+		const cols = document.querySelectorAll(`.guess-slot--row-${this.activeRow}`);
 		const colsComplete = [...cols].filter(item => (item.getAttribute('data-guess') !== 'null'));
 
 		if (colsComplete.length == 4) {
-			this.completeRow(this.activeRow);
+			this.scoreRow(this.activeRow);
+			this.disableRow(this.activeRow);
 			if (this.activeRow < 10) {
 				this.activeRow ++;
 				this.enableRow(this.activeRow);
 			}
 		}
 	}
+	disableRow(rowNumber) {
+		const row = document.querySelector(`.guess-row--${rowNumber}`);
+		row.classList.add('complete');
+		row.classList.remove('active');
 
-	completeRow(rowNumber) {
 		const dropzones = document.querySelectorAll(`.guess-slot--row-${rowNumber}`);
-		dropzones.forEach((zone)=>{
-			zone.classList.remove('ready');
-			zone.classList.add('complete');
+		// Remove classes and disable event listneres
+		dropzones.forEach( zone =>{
 			zone.removeEventListener('dragover', this.boundDragOver);
 			zone.removeEventListener('dragenter', this.boundDragEnter);
 			zone.removeEventListener('dragleave', this.boundDragLeave);
 			zone.removeEventListener('drop', this.boundDrop);
 		});
+
+	}
+
+	scoreRow(rowNumber) {
+		const dropzones = document.querySelectorAll(`.guess-slot--row-${rowNumber}`);
+
+		// Scores
+
+		// Correct guesses: Count right color, right place
+		let correctGuesses = new Array;
+
+		[...dropzones].forEach( (zone, i) =>{
+			const guessColor = zone.getAttribute('data-guess');
+			const answerColor = this.secret[i];
+			if (guessColor=== answerColor) {
+				correctGuesses.push(i);
+			};
+		});
+
+		console.log('correct indexes are ', correctGuesses)
+		console.log('correct count', correctGuesses.length);
+
+		// Close guesses: Of the remaining, count right color, wrong place
+		const remainingSecret = this.secret.filter((guess, i)=> {
+			return ! (correctGuesses.includes(i));
+		})
+
+		let closeGuesses = new Array;
+		 [...dropzones].forEach( (zone, i) =>{
+			const guessColor = zone.getAttribute('data-guess');
+			if (! correctGuesses.includes(i) && remainingSecret.includes(guessColor)) {
+					closeGuesses.push(i);
+				}
+		});
+
+		console.log('close indexes are ', closeGuesses)
+		console.log('close count', closeGuesses.length);
+
+		// Add classes to score pins
+		for (let p =1; p <= 4; p++) {
+			let className ='';
+			if (p <= correctGuesses.length) {
+				className = 'correct';
+			} else if (p <=correctGuesses.length + closeGuesses.length) {
+				className = 'close';
+			} else {
+				className = 'incorrect';
+			}
+			const pin = document.querySelector(`.row-score__pin--row-${rowNumber}-pin-${p}`);
+			pin.classList.add(`row-score__pin--${className}`);
+		}
+
+
 	}
 
 	handleDragStart(e) {
-		console.log('Drag Start');
-		console.log('dragging', e.target);
-		console.log('drag color', this.dragColor);
+		// console.log('dragging', e.target);
+		// console.log('drag color', this.dragColor);
 		this.dragColor = e.target.getAttribute('data-color')
 	}
 
@@ -109,7 +172,6 @@ class Game {
 	}
 
 
-
 	setupGameBoard() {
 		const gameBoard = document.createElement('div');
 		gameBoard.classList.add('game-board');
@@ -119,12 +181,25 @@ class Game {
 			const guessRow = document.createElement('div');
 			guessRow.classList.add('guess-row', `guess-row--${i}`);
 
+			// Guess slots
 			for (let j = 1; j<=4; j++) {
 				const guessSlot =  document.createElement('span');
 				guessSlot.classList.add('guess-slot', `guess-slot--row-${i}`, `guess-slot--col-${j}`);
 				guessSlot.id = `guess-slot-row-${i}-col-${j}`;
 				guessRow.appendChild(guessSlot);
 			}
+			// Score pins
+			const scoreWrap = document.createElement('div');
+			scoreWrap.classList.add('row-score', `row-score--${i}`);
+			scoreWrap.id =`row-score-${i}'`;
+
+			for (let k = 1; k<=4; k++) {
+				const scorePin =  document.createElement('span');
+				scorePin.classList.add('row-score__pin', `row-score__pin--row-${i}-pin-${k}`);
+				scoreWrap.appendChild(scorePin);
+			}
+			guessRow.appendChild(scoreWrap);
+
 			gameBoard.appendChild(guessRow);
 		}
 
@@ -132,11 +207,10 @@ class Game {
 
 	setupControlsRow() {
 
-		const colors = ['red', 'green', 'blue', 'white', 'yellow', 'black'];
 		const controlsRow = document.createElement('div');
 		controlsRow.classList.add('controls-row');
 
-		colors.forEach((color=>{
+		this.pegColors.forEach((color=>{
 			const control = document.createElement('span');
 			control.setAttribute('draggable', 'true');
 			control.setAttribute('data-color', color);
