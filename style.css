@@ -1,17 +1,18 @@
 :root {
-	--peg-size: 50px;
-	--slot-size: 50px;
+	--peg-size: 40px;
+	--slot-size: 35px;
 }
 
 body, body * {
 	box-sizing: border-box;
 }
 body {
-	background: #333;
+	background: #eaeaea;
 	}
 
 .game {
 	width: 500px;
+	margin: 0 auto;
 	padding: 50px;
 }
 
@@ -19,6 +20,7 @@ body {
 	 display: flex;
 	 align-items: center;
 	 justify-content: space-between;
+	 width: 100%;
 	 padding: 0 0 50px 0;
 
 }
@@ -28,16 +30,9 @@ body {
 	 height: var(--peg-size);
 }
 
-
-.control.over {
-		border-color: white;
-	transform: scale(1.25);
-}
-
 .game-board {
 	min-height: 400px;
 }
-
 
 .guess-row {
 	align-items: center;
@@ -47,7 +42,7 @@ body {
 }
 
 .guess-slot {
-	background: #444;
+	background: #888;
 	border-radius: 50%;
 	height: var(--slot-size);
 	display: block;
@@ -55,10 +50,10 @@ body {
 	transition: all .2s linear;
 }
 
-
-
 .guess-slot.ready {
-	background: #888;
+	background: #444;
+	border: 2px solid #444;
+
 }
 
 .guess-slot.complete {

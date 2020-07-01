@@ -1,3 +1,4 @@
+
 class Game {
 	constructor() {
 		this.game = document.querySelector('.game');
@@ -7,6 +8,12 @@ class Game {
 
 		this.dragColor = null;
 		this.activeRow = 1;
+
+		// bound event listeners
+		this.boundDragOver = this.handleDragOver.bind(this);
+		this.boundDragEneter = this.handleDragEnter.bind(this);
+		this.boundDragLeave = this.handleDragLeave.bind(this);
+		this.boundDrop = this.handleDrop.bind(this);
 
 		this.setUpDraggables();
 		this.enableRow('1'); // row 1
@@ -25,13 +32,15 @@ class Game {
 	enableRow(rowNumber) {
 		const dropzones = document.querySelectorAll(`.guess-slot--row-${rowNumber}`);
 
-		dropzones.forEach((zone)=>{
+		dropzones.forEach((zone, i)=>{
 			zone.classList.add('ready');
 			zone.setAttribute('data-guess', 'null');
-			zone.addEventListener('dragover', this.handleDragOver.bind(this));
-			zone.addEventListener('dragenter', this.handleDragEnter.bind(this));
-			zone.addEventListener('dragleave', this.handleDragLeave.bind(this));
-			zone.addEventListener('drop', this.handleDrop.bind(this));
+
+			zone.addEventListener('dragover', this.boundDragOver);
+			zone.addEventListener('dragenter', this.boundDragEnter);
+			zone.addEventListener('dragleave', this.boundDragLeave);
+			zone.addEventListener('drop', this.boundDrop);
+
 		});
 	}
 
@@ -40,13 +49,11 @@ class Game {
 		const colsComplete = [...cols].filter(item => (item.getAttribute('data-guess') !== 'null'));
 
 		if (colsComplete.length == 4) {
-			alert('row done')
 			this.completeRow(this.activeRow);
 			if (this.activeRow < 10) {
 				this.activeRow ++;
 				this.enableRow(this.activeRow);
 			}
-
 		}
 	}
 
@@ -55,12 +62,11 @@ class Game {
 		dropzones.forEach((zone)=>{
 			zone.classList.remove('ready');
 			zone.classList.add('complete');
-			zone.removeEventListener('dragover', this.handleDragOver.bind(this));
-			zone.removeEventListener('dragenter', this.handleDragEnter.bind(this));
-			zone.removeEventListener('dragleave', this.handleDragLeave.bind(this));
-			zone.removeEventListener('drop', this.handleDrop.bind(this));
+			zone.removeEventListener('dragover', this.boundDragOver);
+			zone.removeEventListener('dragenter', this.boundDragEnter);
+			zone.removeEventListener('dragleave', this.boundDragLeave);
+			zone.removeEventListener('drop', this.boundDrop);
 		});
-
 	}
 
 	handleDragStart(e) {
