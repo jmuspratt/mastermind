@@ -15,6 +15,9 @@ class Game {
 
 		// Bound event listeners
 		// https://stackoverflow.com/questions/11565471/removing-event-listener-which-was-added-with-bind
+		this.boundDragStart = this.handleDragStart.bind(this);
+		this.boundDragEnd = this.handleDragEnd.bind(this);
+
 		this.boundDragOver = this.handleDragOver.bind(this);
 		this.boundDragEneter = this.handleDragEnter.bind(this);
 		this.boundDragLeave = this.handleDragLeave.bind(this);
@@ -25,15 +28,20 @@ class Game {
 
 	}
 	setupSecret() {
-		this.secret = ['red', 'blue', 'green', 'green']
+		this.secret = new Array();
+		for (let i = 0; i <= 3; i++) {
+			const randNumber = Math.floor(Math.random() * 6); // rand between 0 and 5
+			this.secret.push(this.pegColors[randNumber]);
+		}
+		console.log('secret is', this.secret);
 	}
 
 	setUpDraggables() {
 		this.draggables = document.querySelectorAll('.control');
 		this.draggables.forEach((control)=>{
-			control.addEventListener('dragstart', this.handleDragStart.bind(this));
-			control.addEventListener('dragend', this.handleDragEnd.bind(this));
-		})
+			control.addEventListener('dragstart', this.boundDragStart);
+			control.addEventListener('dragend', this.boundDragEnd);
+		});
 
 	}
 
@@ -59,6 +67,7 @@ class Game {
 		if (colsComplete.length == 4) {
 			this.scoreRow(this.activeRow);
 			this.disableRow(this.activeRow);
+
 			if (this.activeRow < 10) {
 				this.activeRow ++;
 				this.enableRow(this.activeRow);
@@ -97,8 +106,8 @@ class Game {
 			};
 		});
 
-		console.log('correct indexes are ', correctGuesses)
-		console.log('correct count', correctGuesses.length);
+		// console.log('correct indexes are ', correctGuesses)
+		// console.log('correct count', correctGuesses.length);
 
 		// Close guesses: Of the remaining, count right color, wrong place
 		const remainingSecret = this.secret.filter((guess, i)=> {
@@ -113,8 +122,8 @@ class Game {
 				}
 		});
 
-		console.log('close indexes are ', closeGuesses)
-		console.log('close count', closeGuesses.length);
+		// console.log('close indexes are ', closeGuesses)
+		// console.log('close count', closeGuesses.length);
 
 		// Add classes to score pins
 		for (let p =1; p <= 4; p++) {
@@ -128,6 +137,11 @@ class Game {
 			}
 			const pin = document.querySelector(`.row-score__pin--row-${rowNumber}-pin-${p}`);
 			pin.classList.add(`row-score__pin--${className}`);
+		}
+
+		//
+		if (correctGuesses.length == 4) {
+			alert("You have won!");
 		}
 
 
